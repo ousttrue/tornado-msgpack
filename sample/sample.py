@@ -16,10 +16,10 @@ if __name__=="__main__":
     
     # server
     server_loop=tornado.ioloop.IOLoop()
-    def on_receive(msg, session):
+    def on_message(msg, session):
         result=dispatcher.dispatch(msg)
         session.send_async(result)
-    server=tornado_msgpack.Server(server_loop)
+    server=tornado_msgpack.Server(server_loop, on_message)
     server.listen(port)
     server_thread=threading.Thread(target=lambda : server_loop.start() )
     server_thread.start()
