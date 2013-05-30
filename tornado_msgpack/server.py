@@ -12,5 +12,5 @@ class Server(tornado.tcpserver.TCPServer):
     def handle_stream(self, stream, address):
         session=tornado_msgpack.Session(stream, self.on_message, self.on_status)
         self.session_map[address]=session
-        stream.read_until_close(None, session.on_read)
+        session.start_reading()
 

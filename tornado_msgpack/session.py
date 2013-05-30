@@ -1,4 +1,5 @@
 import msgpack
+import threading
 
 
 class Session(object):
@@ -10,6 +11,7 @@ class Session(object):
         self.unpacker = msgpack.Unpacker(encoding=encoding)
 
     def on_read(self, data):
+        print("{0}:on_read".format(threading.current_thread()))
         self.unpacker.feed(data)
         for message in self.unpacker:
             self.on_message(message, self)
@@ -17,4 +19,11 @@ class Session(object):
     def on_close(self):
         if self.on_status:
             self.on_status(self, "closed")
+
+    def send_async(self, data):
+        print("{0}:send {1} bytes".format(threading.current_thread(), len(data)))
+        self.stream.write(data)
+
+    def start_reading(self):
+        self.stream.read_until_close(None, self.on_read)
 

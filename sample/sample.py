@@ -27,7 +27,7 @@ if __name__=="__main__":
     # client
     client_loop=tornado.ioloop.IOLoop()
     client=tornado_msgpack.Client(client_loop)
-    def on_status_changed(status):
+    def on_status_changed(session, status):
         print(status)
     client.attach_status_callback(on_status_changed)
     client.connect("localhost", port)
