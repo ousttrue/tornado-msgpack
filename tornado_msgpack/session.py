@@ -33,6 +33,9 @@ class Session(object):
     def attach_status_callback(self, on_status):
         self.on_status=on_status
 
+    def is_connected(self):
+        return self.status==STATUS_CONNECTED
+
     def connect(self, host, port):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
         self.stream = tornado.iostream.IOStream(sock, io_loop=self.io_loop)
