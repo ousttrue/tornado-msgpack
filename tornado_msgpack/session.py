@@ -1,14 +1,51 @@
 import msgpack
 import threading
+import socket
+import tornado.iostream
+
+
+STATUS_NOT_CONNECTED=0
+STATUS_CONNECTING=1
+STATUS_CONNECTED=2
+STATUS_CLOSING=3
 
 
 class Session(object):
-    def __init__(self, stream, on_message, on_status, encoding="utf-8"):
-        stream.set_close_callback(self.on_close)
-        self.stream=stream
+    def __init__(self, io_loop, on_message, encoding="utf-8"):
+        self.io_loop=io_loop
+        self.stream=None
         self.on_message=on_message
-        self.on_status=on_status
         self.unpacker = msgpack.Unpacker(encoding=encoding)
+        self._status=STATUS_NOT_CONNECTED
+        self.on_status=None
+
+    # status
+    def set_status(self, status):
+        if self._status==status:
+            return
+        self._status=status
+        if self.on_status:
+            self.on_status(self, self._status)
+    def get_status(self):
+        return self._status
+    status=property(get_status, set_status)
+
+    def attach_status_callback(self, on_status):
+        self.on_status=on_status
+
+    def connect(self, host, port):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+        self.stream = tornado.iostream.IOStream(sock, io_loop=self.io_loop)
+        self.stream.set_close_callback(self.on_close)
+        self.stream.connect((host, port), self.on_connect)
+        self.status=STATUS_CONNECTING
+
+    def on_connect(self): 
+        self.status=STATUS_CONNECTED
+        self.start_reading()
+
+    def start_reading(self):
+        self.stream.read_until_close(None, self.on_read)
 
     def on_read(self, data):
         print("{0}:on_read".format(threading.current_thread()))
@@ -17,13 +54,9 @@ class Session(object):
             self.on_message(message, self)
 
     def on_close(self):
-        if self.on_status:
-            self.on_status(self, "closed")
+        self.status=STATUS_NOT_CONNECTED
 
     def send_async(self, data):
         print("{0}:send {1} bytes".format(threading.current_thread(), len(data)))
         self.stream.write(data)
-
-    def start_reading(self):
-        self.stream.read_until_close(None, self.on_read)
 

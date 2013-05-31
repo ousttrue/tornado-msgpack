@@ -1,8 +1,7 @@
-import tornado.iostream
-import socket
 import tornado_msgpack
 import msgpack
 import threading
+
 
 class Future(object):
     def __init__(self, callback):
@@ -41,26 +40,9 @@ class RequestFactory(object):
 
 class Client(object):
     def __init__(self, io_loop, encoding="utf-8"):
-        self.io_loop=io_loop
-        self.sock=None
-        self.on_status=None
         self.request_map={}
         self.request_factory=RequestFactory(encoding)
-
-    def attach_status_callback(self, on_status):
-        self.on_status=on_status
-
-    def connect(self, host, port):
-        assert(self.sock==None)
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
-        stream = tornado.iostream.IOStream(self.sock, io_loop=self.io_loop)
-        self.session=tornado_msgpack.Session(stream, self.on_response, self.on_status)
-        stream.connect((host, port), self.on_connect)
-
-    def on_connect(self): 
-        if self.on_status:
-            self.on_status(self, "connected")
-        self.session.start_reading()
+        self.session=tornado_msgpack.session.Session(io_loop, self.on_response)
 
     def on_response(self, message, session):
         msgid=message[1]

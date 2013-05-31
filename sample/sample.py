@@ -13,22 +13,29 @@ if __name__=="__main__":
     def add(a, b):
         return a+b
     dispatcher.add_handler("add", add)
+
+    def starter(target):
+        def func():
+            print("{0} start".format(target))
+            target.start()
+            print("{0} finished".format(target))
+        return func
     
     # server
     server_loop=tornado.ioloop.IOLoop()
+    server_thread=threading.Thread(target=starter(server_loop))
     server=tornado_msgpack.Server(server_loop, dispatcher.on_message)
     server.listen(port)
-    server_thread=threading.Thread(target=lambda : server_loop.start() )
     server_thread.start()
 
     # client
     client_loop=tornado.ioloop.IOLoop()
+    client_thread=threading.Thread(target=starter(client_loop))
     client=tornado_msgpack.Client(client_loop)
     def on_status_changed(session, status):
         print(status)
-    client.attach_status_callback(on_status_changed)
-    client.connect("localhost", port)
-    client_thread=threading.Thread(target=lambda : client_loop.start() )
+    client.session.attach_status_callback(on_status_changed)
+    client.session.connect("localhost", port)
     client_thread.start()
 
     # request
