@@ -11,8 +11,16 @@ class Dispatcher(object):
         self.method_map[name]=method
 
     def dispatch(self, msg):
-        print("dispatch")
-        _, msgid, method, *args=msg
-        result=None
-        return self.packer.pack([1, msgid, 0, result]) 
+        _, msgid, method, args=msg
+        if not method in self.method_map:
+            return self.packer.pack([1, msgid, True, "no method"]) 
+        try:
+            result=self.method_map[method](*args)
+            return self.packer.pack([1, msgid, False, result]) 
+        except Exception as ex:
+            return self.packer.pack([1, msgid, True, str(ex)]) 
+
+    def on_message(self, msg, session):
+        result=self.dispatch(msg)
+        session.send_async(result)
 

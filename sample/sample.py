@@ -16,10 +16,7 @@ if __name__=="__main__":
     
     # server
     server_loop=tornado.ioloop.IOLoop()
-    def on_message(msg, session):
-        result=dispatcher.dispatch(msg)
-        session.send_async(result)
-    server=tornado_msgpack.Server(server_loop, on_message)
+    server=tornado_msgpack.Server(server_loop, dispatcher.on_message)
     server.listen(port)
     server_thread=threading.Thread(target=lambda : server_loop.start() )
     server_thread.start()
@@ -36,7 +33,7 @@ if __name__=="__main__":
 
     # request
     def on_receive(result):
-        print(result)
+        print("on_receive:{0}".format(result))
 
     future=client.call_async_with_callback(on_receive, "add", 1)
     future.join()

@@ -16,9 +16,10 @@ class Future(object):
         with self.condition:
             if not self.done:
                 self.condition.wait()
+                if self.callback:
+                    self.callback(self.message)
 
     def set_response(self, message):
-        print("set_response")
         with self.condition:
             self.message=message
             self.done=True
@@ -70,7 +71,7 @@ class Client(object):
             print("not found !")
 
     def call_async_with_callback(self, callback, method, *args):
-        msgid, request=self.request_factory.create(method, args)
+        msgid, request=self.request_factory.create(method, *args)
         future = Future(callback)
         self.request_map[msgid] = future
         self.session.send_async(request)
