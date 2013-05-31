@@ -15,14 +15,14 @@ class Future(object):
         with self.condition:
             if not self.done:
                 self.condition.wait()
-                if self.callback:
-                    self.callback(self.message)
 
     def set_response(self, message):
         with self.condition:
             self.message=message
             self.done=True
             self.condition.notifyAll()
+            if self.callback:
+                self.callback(self.message)
 
 
 class RequestFactory(object):
@@ -47,6 +47,7 @@ class Client(object):
     def on_response(self, message, session):
         msgid=message[1]
         if msgid in self.request_map:
+            print("{0}: set_response")
             future=self.request_map[msgid]
             future.set_response(message)
         else:

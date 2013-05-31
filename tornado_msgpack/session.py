@@ -48,12 +48,13 @@ class Session(object):
         self.start_reading()
 
     def start_reading(self):
-        self.stream.read_until_close(None, self.on_read)
+        self.stream.read_until_close(self.on_read, self.on_read)
 
     def on_read(self, data):
-        print("{0}:on_read".format(threading.current_thread()))
+        print("{0}:on_read {1} bytes".format(threading.current_thread(), len(data)))
         self.unpacker.feed(data)
         for message in self.unpacker:
+            print(message)
             self.on_message(message, self)
 
     def on_close(self):
