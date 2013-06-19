@@ -5,6 +5,7 @@ Yet another MessagePack RPC for Python
 
 usage
 -----
+::
 
   import tornado_msgpack
   dispatcher=tornado_msgpack.Dispatcher()

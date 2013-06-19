@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 import tornado_msgpack
-import tornado.ioloop
-import threading
 
 
 if __name__=="__main__":
