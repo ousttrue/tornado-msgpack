@@ -1,6 +1,7 @@
 import tornado_msgpack
 import msgpack
 import threading
+import contextlib
 
 
 class Future(object):
@@ -59,4 +60,32 @@ class Client(object):
         self.request_map[msgid] = future
         self.session.send_async(request)
         return future
+
+    def call_async(self, method, *args):
+        return self.call_async_with_callback(None, method, *args)
+
+    def call_sync(self, method, *args):
+        future=self.call_async(method, *args)
+        future.join()
+        if future.message[2]:
+            raise Exception(future.message[3])
+        return future.message[3]
+
+
+@contextlib.contextmanager
+def ClientLoop(host, port):
+    import tornado
+    import threading
+    client_loop=tornado.ioloop.IOLoop()
+    client_thread=threading.Thread(target=lambda : client_loop.start())
+    client=tornado_msgpack.Client(client_loop)
+    client.session.connect(host, port)
+    client_thread.start()
+    try:
+        yield client
+    except Exception as ex:
+        raise ex
+    finally:
+        client_loop.stop()
+        client_thread.join()
 

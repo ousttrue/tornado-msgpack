@@ -1,5 +1,6 @@
 import tornado.tcpserver
 import tornado_msgpack
+import contextlib
 
 
 class Server(tornado.tcpserver.TCPServer):
@@ -15,4 +16,21 @@ class Server(tornado.tcpserver.TCPServer):
         session.stream=stream
         self.session_map[address]=session
         session.start_reading()
+
+
+@contextlib.contextmanager
+def ServerLoop(host, port, on_message):
+    import tornado
+    import threading
+    # server
+    server_loop=tornado.ioloop.IOLoop()
+    server_thread=threading.Thread(target=lambda : server_loop.start())
+    server=tornado_msgpack.Server(server_loop, on_message)
+    server.listen(port)
+    server_thread.start()
+    try:
+        yield
+    finally:
+        server_loop.stop()
+        server_thread.join()
 
