@@ -9,10 +9,12 @@ port=18080
 client_loop=tornado.ioloop.IOLoop()
 client_thread=threading.Thread(target=lambda : client_loop.start())
 
+client=tornado_msgpack.Client(client_loop)
+
 # connecion status
 def on_status(session):
     print("status changed: "+session.status)
-client=tornado_msgpack.Client(client_loop, on_status)
+client.attach_status_callback(on_status)
 
 client.session.connect(host, port)
 try:

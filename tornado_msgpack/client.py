@@ -44,8 +44,10 @@ class Client(object):
         self.request_map={}
         self.request_factory=RequestFactory(encoding)
         self.session=tornado_msgpack.session.Session(io_loop, self.on_response)
-        if status_callback:
-            self.session.attach_status_callback(status_callback)
+        self.attach_status_callback(status_callback)
+
+    def attach_status_callback(self, status_callback):
+        self.session.attach_status_callback(status_callback)
 
     def on_response(self, message, session):
         msgid=message[1]
