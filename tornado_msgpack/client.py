@@ -48,11 +48,11 @@ class Client(object):
     def on_response(self, message, session):
         msgid=message[1]
         if msgid in self.request_map:
-            print("{0}: set_response")
+            #print("{0}: set_response")
             future=self.request_map[msgid]
             future.set_response(message)
         else:
-            print("not found !")
+            raise Exception("not found for msgid: %d!" % msgid)
 
     def call_async_with_callback(self, callback, method, *args):
         msgid, request=self.request_factory.create(method, *args)

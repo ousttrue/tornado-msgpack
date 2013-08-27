@@ -51,16 +51,16 @@ class Session(object):
         self.stream.read_until_close(self.on_read, self.on_read)
 
     def on_read(self, data):
-        print("{0}:on_read {1} bytes".format(threading.current_thread(), len(data)))
+        #print("{0}:on_read {1} bytes".format(threading.current_thread(), len(data)))
         self.unpacker.feed(data)
         for message in self.unpacker:
-            print(message)
+            #print(message)
             self.on_message(message, self)
 
     def on_close(self):
         self.status=STATUS_NOT_CONNECTED
 
     def send_async(self, data):
-        print("{0}:send {1} bytes".format(threading.current_thread(), len(data)))
+        #print("{0}:send {1} bytes".format(threading.current_thread(), len(data)))
         self.stream.write(data)
 
