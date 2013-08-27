@@ -46,8 +46,16 @@ server
     server=tornado_msgpack.Server(server_loop, dispatcher.on_message)
     server.listen(port)
 
-    # blocking...
-    server_loop.start()
+    import signal
+    def handler(signum, frame):
+        server_loop.stop()
+    signal.signal(signal.SIGINT, handler)
+
+    try:
+        # blocking...
+        server_loop.start()
+    except ex as KeyboardInterrupt:
+        pass
  
 client
 ++++++
