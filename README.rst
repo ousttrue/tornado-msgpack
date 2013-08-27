@@ -10,12 +10,16 @@ demo
 ++++
 ::
 
+    #!/usr/bin/env python
+
+    port=28080
+
     import tornado_msgpack
     dispatcher=tornado_msgpack.Dispatcher()
     def add(a, b):
         return a+b
     dispatcher.add_handler("add", add)
-    
+
     with tornado_msgpack.ServerLoop("", port, dispatcher.on_message):
         with tornado_msgpack.ClientLoop("localhost", port) as client:
             print(client.call_sync("add", 3, 4))
@@ -24,8 +28,12 @@ server
 ++++++
 ::
 
+    #!/usr/bin/env python
+
     import tornado_msgpack
     import tornado
+
+    port=18080
 
     # dispatcher
     dispatcher=tornado_msgpack.Dispatcher()
@@ -45,17 +53,21 @@ client
 ++++++
 ::
 
+    #!/usr/bin/env python
     import tornado_msgpack
     import tornado
+    import threading
+
+    host="127.0.0.1"
+    port=18080
 
     client_loop=tornado.ioloop.IOLoop()
     client_thread=threading.Thread(target=lambda : client_loop.start())
-    client=tornado_msgpack.Client(client_loop)
 
     # connecion status
     def on_status(session):
         print("status changed: "+session.status)
-    client.attach_status_callback(on_status)
+    client=tornado_msgpack.Client(client_loop, on_status)
 
     client.session.connect(host, port)
     try:
@@ -79,4 +91,3 @@ client
     finally:
         client_loop.stop()
         client_thread.join()
-

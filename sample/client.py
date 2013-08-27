@@ -1,39 +1,38 @@
 #!/usr/bin/env python
-
 import tornado_msgpack
+import tornado
+import threading
 
+host="127.0.0.1"
+port=18080
 
-if __name__=="__main__":
-    host="localhost"
-    port=18080
+client_loop=tornado.ioloop.IOLoop()
+client_thread=threading.Thread(target=lambda : client_loop.start())
 
-    def status_callback(session):
-        print("status:%s" % session.status)
+# connecion status
+def on_status(session):
+    print("status changed: "+session.status)
+client=tornado_msgpack.Client(client_loop, on_status)
 
-    import tornado
-    import threading
-    client_loop=tornado.ioloop.IOLoop()
-    client_thread=threading.Thread(target=lambda : client_loop.start())
-    client=tornado_msgpack.Client(client_loop, status_callback)
-    client.session.connect(host, port)
+client.session.connect(host, port)
+try:
     client_thread.start()
 
-    print("## call_sync ##")
-    print(client.call_sync("add", 3, 4))
+    # sync
+    result=client.call_sync("add", 3, 4)
 
-    print("## call_async ##")
-    future=client.call_async("add", 1)
-    future.join()
-    print(future)
+    # async
+    future=client.call_async("add", 5, 6)
+    future.join() # wait server respone
+    msgpack_rpc=future.message
+    result=msgpack_rpc[3]
 
-    print("## call_async_with_callback ##")
-    def on_receive(result):
-        print("on_receive:{0}".format(result))
-    future=client.call_async_with_callback(on_receive, "add", 1, 2)
-    future.join()
+    # async_with_callback
+    def on_receive(msgpack_rpc):
+        print(msgpack_rpc)
+    future=client.call_async_with_callback(on_receive, "add", 5, 6)
+    future.join() # wait server respone
 
-    print("done")
-
+finally:
     client_loop.stop()
     client_thread.join()
-
