@@ -3,6 +3,10 @@ tornado-msgpack
 
 Yet another MessagePack RPC for Python
 
+history
+-------
+* 20130827 0.4 add logging
+
 samples
 -------
 

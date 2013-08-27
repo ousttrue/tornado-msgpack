@@ -7,7 +7,7 @@ except ImportError:
     from distutils.core import setup
 
 setup(name='tornado_msgpack',
-        version=0.3,
+        version=0.4,
         author='ousttrue',
         author_email='ousttrue@gmail.com',
         description="ore ore MessagePack RPC",
