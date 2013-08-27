@@ -2,6 +2,9 @@
 
 import tornado_msgpack
 import tornado
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 port=18080
 

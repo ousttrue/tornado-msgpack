@@ -2,6 +2,8 @@ import msgpack
 import threading
 import socket
 import tornado.iostream
+import logging
+logger=logging.getLogger("tornado_msgpack")
 
 
 class Session(object):
@@ -50,16 +52,18 @@ class Session(object):
         self.stream.read_until_close(self.on_read, self.on_read)
 
     def on_read(self, data):
-        #print("{0}:on_read {1} bytes".format(threading.current_thread(), len(data)))
+        logger.debug("{0}: Session#on_read: {1} bytes".format(
+            threading.current_thread().getName(), len(data)))
         self.unpacker.feed(data)
         for message in self.unpacker:
-            #print(message)
+            logger.debug(message)
             self.on_message(message, self)
 
     def on_close(self):
         self.status=Session.STATUS_NOT_CONNECTED
 
     def send_async(self, data):
-        #print("{0}:send {1} bytes".format(threading.current_thread(), len(data)))
+        logger.debug("{0}: Session#send_async: {1} bytes".format(
+            threading.current_thread().getName(), len(data)))
         self.stream.write(data)
 

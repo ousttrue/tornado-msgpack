@@ -1,6 +1,8 @@
 import tornado.tcpserver
 import tornado_msgpack
 import contextlib
+import logging
+logger=logging.getLogger("tornado_msgpack")
 
 
 class Server(tornado.tcpserver.TCPServer):
@@ -12,10 +14,15 @@ class Server(tornado.tcpserver.TCPServer):
         self.keeper.start()
 
     def handle_stream(self, stream, address):
+        logger.debug("Server#handle_stream")
         session=tornado_msgpack.Session(self.io_loop, self.on_message)
         session.stream=stream
         self.session_map[address]=session
         session.start_reading()
+
+    def listen(self, *args):
+        logger.debug("Server#listen: {0}".format(args[0]))
+        super(Server, self).listen(*args)
 
 
 @contextlib.contextmanager

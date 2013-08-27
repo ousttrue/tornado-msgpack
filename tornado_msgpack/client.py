@@ -2,6 +2,8 @@ import tornado_msgpack
 import msgpack
 import threading
 import contextlib
+import logging
+logger=logging.getLogger("tornado_msgpack")
 
 
 class Future(object):
@@ -52,7 +54,7 @@ class Client(object):
     def on_response(self, message, session):
         msgid=message[1]
         if msgid in self.request_map:
-            #print("{0}: set_response")
+            logger.debug("Client#on_response: {0}".format(msgid))
             future=self.request_map[msgid]
             future.set_response(message)
         else:
