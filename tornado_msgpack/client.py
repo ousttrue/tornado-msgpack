@@ -40,10 +40,12 @@ class RequestFactory(object):
 
 
 class Client(object):
-    def __init__(self, io_loop, encoding="utf-8"):
+    def __init__(self, io_loop, status_callback=None, encoding="utf-8"):
         self.request_map={}
         self.request_factory=RequestFactory(encoding)
         self.session=tornado_msgpack.session.Session(io_loop, self.on_response)
+        if status_callback:
+            self.session.attach_status_callback(status_callback)
 
     def on_response(self, message, session):
         msgid=message[1]
@@ -73,12 +75,12 @@ class Client(object):
 
 
 @contextlib.contextmanager
-def ClientLoop(host, port):
+def ClientLoop(host, port, status_callback=None):
     import tornado
     import threading
     client_loop=tornado.ioloop.IOLoop()
     client_thread=threading.Thread(target=lambda : client_loop.start())
-    client=tornado_msgpack.Client(client_loop)
+    client=tornado_msgpack.Client(client_loop, status_callback)
     client.session.connect(host, port)
     client_thread.start()
     try:
