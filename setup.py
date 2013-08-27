@@ -11,12 +11,7 @@ setup(name='tornado_msgpack',
         author='ousttrue',
         author_email='ousttrue@gmail.com',
         description="ore ore MessagePack RPC",
-        long_description="""\
-                MessagePack RPC for Python.
-
-This implementation uses Tornado framework as a backend.
-And it is not hide tornado.ioloop.
-""",
+        long_description=open('README.rst').read(),
         packages=['tornado_msgpack'],
         install_requires=['msgpack-python', 'tornado'],
         license="Apache Software License",
